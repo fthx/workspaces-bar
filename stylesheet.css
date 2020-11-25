@@ -15,3 +15,23 @@
   border: 1px solid rgba(0, 0, 0, 0.8);
   border-radius: 3px;
 }
+
+/* replace by the setup below if you want squared and narrow workspaces thumbnails */
+
+/*.desk-label-active {
+  margin-left: 0px;
+  margin-right: 0px;
+  background-color: rgba(127, 127, 127, 0.8);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  border-radius: 0px;
+}
+
+.desk-label-inactive {
+  margin-left: 0px;
+  margin-right: 0px;
+  background-color: rgba(127, 127, 127, 0.4);
+  color: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  border-radius: 0px;
+}*/
