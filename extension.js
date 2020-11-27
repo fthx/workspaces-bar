@@ -5,11 +5,10 @@
 	License GPL v3
 */
 
-
-const { Clutter, GLib, GObject, Meta, Shell, St } = imports.gi;
-const Lang = imports.lang;
+const { Clutter, GObject, St } = imports.gi;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
+const Lang = imports.lang;
 
 var WorkspacesBar = GObject.registerClass(
 class WorkspacesBar extends PanelMenu.Button {
@@ -23,15 +22,15 @@ class WorkspacesBar extends PanelMenu.Button {
 		this.ws_bar = new St.BoxLayout({});
         this._update_ws();
         
-        // signals : active workspace, number of workspaces
-		this._ws_changed = global.workspace_manager.connect('active-workspace-changed', Lang.bind(this, this._update_ws));
-		this._ws_number_changed = global.workspace_manager.connect('notify::n-workspaces', Lang.bind(this, this._update_ws))
+        // signals: active workspace, number of workspaces
+		this._ws_active_changed = global.workspace_manager.connect('active-workspace-changed', Lang.bind(this, this._update_ws));
+		this._ws_number_changed = global.workspace_manager.connect('notify::n-workspaces', Lang.bind(this, this._update_ws));
 	}
 
-	// remove signals, restore Activities button, destroy the task bar
+	// remove signals, restore Activities button, destroy workspaces bar
 	_destroy() {
 		this._show_activities(true);
-		global.workspace_manager.disconnect(this._ws_changed);
+		global.workspace_manager.disconnect(this._ws_active_changed);
 		global.workspace_manager.disconnect(this._ws_number_changed);
 		this.ws_bar.destroy();
 		super.destroy();
@@ -42,16 +41,16 @@ class WorkspacesBar extends PanelMenu.Button {
 		this.activities_button = Main.panel.statusArea['activities'];
 		if (this.activities_button) {
 			if (show && !Main.sessionMode.isLocked) {
-				this.activities_button.container.show()
+				this.activities_button.container.show();
 			} else {
-				this.activities_button.container.hide()
+				this.activities_button.container.hide();
 			}
 		}
 	}
 
 	// update the workspaces bar
     _update_ws() {   
-    	// destroy old task bar 	
+    	// destroy old workspaces bar buttons
     	this.ws_bar.destroy_all_children();
     	
     	// get number of workspaces
@@ -76,12 +75,12 @@ class WorkspacesBar extends PanelMenu.Button {
 		this.add_child(this.ws_bar);
     }
 
-    // activate workspace ws
-    _toggle_ws(index) {
-		if (global.workspace_manager.get_active_workspace_index() == index) {
+    // activate workspace or show overview
+    _toggle_ws(ws_index) {
+		if (global.workspace_manager.get_active_workspace_index() == ws_index) {
 			Main.overview.toggle();
 		}
-		global.workspace_manager.get_workspace_by_index(index).activate(global.get_current_time());
+		global.workspace_manager.get_workspace_by_index(ws_index).activate(global.get_current_time());
     }
 });
 
@@ -97,9 +96,6 @@ function enable() {
 }
 
 function disable() {
-	// destroy workspaces bar
+	// destroy workspaces bar and show Activities button
 	workspaces_bar._destroy();
-
-	// restore default Activities button
-	Main.panel.statusArea.appMenu._iconBox.show();
 }
