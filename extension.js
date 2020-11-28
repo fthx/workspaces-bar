@@ -21,6 +21,7 @@ class WorkspacesBar extends PanelMenu.Button {
 		// bar creation
 		this.ws_bar = new St.BoxLayout({});
         this._update_ws();
+        this.add_child(this.ws_bar);
         
         // signals: active workspace, number of workspaces
 		this._ws_active_changed = global.workspace_manager.connect('active-workspace-changed', Lang.bind(this, this._update_ws));
@@ -70,9 +71,6 @@ class WorkspacesBar extends PanelMenu.Button {
 			this.ws_box.connect('button-press-event', Lang.bind(this, function() { this._toggle_ws(ws_index); } ));
 	        this.ws_bar.add_actor(this.ws_box);
 		};
-		
-		// display workspaces bar
-		this.add_child(this.ws_bar);
     }
 
     // activate workspace or show overview
