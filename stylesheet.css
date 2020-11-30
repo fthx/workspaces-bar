@@ -2,7 +2,7 @@
   margin-left: 4px;
   margin-right: 4px;
   background-color: rgba(127, 127, 127, 0.8);
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(204, 204, 204, 1);
   border: 1px solid rgba(0, 0, 0, 0.8);
   border-radius: 2px;
 }
@@ -11,27 +11,8 @@
   margin-left: 4px;
   margin-right: 4px;
   background-color: rgba(127, 127, 127, 0.4);
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(156, 156, 156, 1);
   border: 1px solid rgba(0, 0, 0, 0.8);
   border-radius: 2px;
 }
 
-/* replace by the setup below if you want squared and narrow workspaces thumbnails */
-
-/*.desk-label-active {
-  margin-left: 0px;
-  margin-right: 0px;
-  background-color: rgba(127, 127, 127, 0.8);
-  color: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(0, 0, 0, 0.8);
-  border-radius: 0px;
-}
-
-.desk-label-inactive {
-  margin-left: 0px;
-  margin-right: 0px;
-  background-color: rgba(127, 127, 127, 0.4);
-  color: rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(0, 0, 0, 0.8);
-  border-radius: 0px;
-}*/

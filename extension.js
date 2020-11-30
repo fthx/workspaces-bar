@@ -56,13 +56,14 @@ class WorkspacesBar extends PanelMenu.Button {
     	
     	// get number of workspaces
         this.ws_count = global.workspace_manager.get_n_workspaces();
+        this.active_ws_index = global.workspace_manager.get_active_workspace_index();
 		
 		// display all current workspaces buttons
         for (let ws_index = 0; ws_index < this.ws_count; ++ws_index) {
 			this.ws_box = new St.Bin({visible: true, reactive: true, can_focus: true, track_hover: true});						
 			this.ws_box.label = new St.Label({y_align: Clutter.ActorAlign.CENTER});
-			if (global.workspace_manager.get_active_workspace_index() == ws_index) {
-					this.ws_box.label.style_class = 'desk-label-active';
+			if (ws_index == this.active_ws_index) {
+				this.ws_box.label.style_class = 'desk-label-active';
 			} else {
 				this.ws_box.label.style_class = 'desk-label-inactive';
 			};
