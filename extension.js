@@ -1,11 +1,13 @@
 /* 
 	Workspaces Bar
-	Copyright Francois Thirioux 2020
+	Copyright Francois Thirioux 2021
 	GitHub contributors: @fthx
 	License GPL v3
 */
 
+
 const { Clutter, Gio, GObject, St } = imports.gi;
+
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 
@@ -80,24 +82,25 @@ class WorkspacesBar extends PanelMenu.Button {
 				this.ws_box.label.style_class = 'desk-label-active';
 			} else {
 				this.ws_box.label.style_class = 'desk-label-inactive';
-			};
+			}
 			if (this.workspaces_names[ws_index]) {
 				this.ws_box.label.set_text("  " + this.workspaces_names[ws_index] + "  ");
 			} else {
 				this.ws_box.label.set_text("  " + (ws_index + 1) + "  ");
-			};
+			}
 			this.ws_box.set_child(this.ws_box.label);
 			this.ws_box.connect('button-press-event', () => this._toggle_ws(ws_index) );
 	        this.ws_bar.add_actor(this.ws_box);
-		};
+		}
     }
 
     // activate workspace or show overview
     _toggle_ws(ws_index) {
 		if (global.workspace_manager.get_active_workspace_index() == ws_index) {
 			Main.overview.toggle();
+		} else {
+			global.workspace_manager.get_workspace_by_index(ws_index).activate(global.get_current_time());
 		}
-		global.workspace_manager.get_workspace_by_index(ws_index).activate(global.get_current_time());
     }
 });
 
