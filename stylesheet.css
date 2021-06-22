@@ -1,7 +1,7 @@
 .desktop-label-nonempty-active {
   margin-left: 0px;
   margin-right: 8px;
-  background-color: rgba(127, 127, 127, 0.7);
+  background-color: rgba(128, 128, 128, 0.7);
   color: rgba(207, 207, 207, 1);
   border: 1px solid rgba(207, 207, 207, 0.7);
   border-radius: 4px;
@@ -10,7 +10,7 @@
 .desktop-label-nonempty-inactive {
   margin-left: 0px;
   margin-right: 8px;
-  background-color: rgba(63, 63, 63, 0.7);
+  background-color: rgba(76, 76, 76, 0.7);
   color: rgba(207, 207, 207, 0.7);
   border: 1px solid rgba(207, 207, 207, 0.7);
   border-radius: 4px;
@@ -19,17 +19,17 @@
 .desktop-label-empty-active {
   margin-left: 0px;
   margin-right: 8px;
-  background-color: rgba(127, 127, 127, 0.7);
+  background-color: rgba(128, 128, 128, 0.7);
   color: rgba(207, 207, 207, 1);
-  /*border: 1px hidden rgba(207, 207, 207, 0.7);*/
+  border: 1px solid rgba(207, 207, 207, 0);
   border-radius: 4px;
 }
 
 .desktop-label-empty-inactive {
   margin-left: 0px;
   margin-right: 8px;
-  background-color: rgba(63, 63, 63, 0.7);
+  background-color: rgba(76, 76, 76, 0.7);
   color: rgba(207, 207, 207, 0.7);
-  /*border: 1px hidden rgba(207, 207, 207, 0.7);*/
+  border: 1px solid rgba(207, 207, 207, 0);
   border-radius: 4px;
 }

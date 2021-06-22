@@ -6,7 +6,7 @@
 */
 
 
-const { Clutter, Gio, GObject, St } = imports.gi;
+const { Clutter, Gio, GObject, Shell, St } = imports.gi;
 
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
@@ -36,6 +36,7 @@ class WorkspacesBar extends PanelMenu.Button {
 		this._ws_active_changed = global.workspace_manager.connect('active-workspace-changed', this._update_ws.bind(this));
 		this._ws_number_changed = global.workspace_manager.connect('notify::n-workspaces', this._update_ws.bind(this));
 		this._restacked = global.display.connect('restacked', this._update_ws.bind(this));
+		this._windows_changed = Shell.WindowTracker.get_default().connect('tracked-windows-changed', this._update_ws.bind(this));
 	}
 
 	// remove signals, restore Activities button, destroy workspaces bar
@@ -49,6 +50,9 @@ class WorkspacesBar extends PanelMenu.Button {
 		}
 		if (this._restacked) {
 			global.display.disconnect(this._restacked);
+		}
+		if (this._windows_changed) {
+			Shell.WindowTracker.get_default().disconnect(this._windows_changed);
 		}
 		if (this.workspaces_names_changed) {
 			this.workspaces_settings.disconnect(this.workspaces_names_changed);
