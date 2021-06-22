@@ -35,14 +35,24 @@ class WorkspacesBar extends PanelMenu.Button {
         // signals for workspaces state: active workspace, number of workspaces
 		this._ws_active_changed = global.workspace_manager.connect('active-workspace-changed', this._update_ws.bind(this));
 		this._ws_number_changed = global.workspace_manager.connect('notify::n-workspaces', this._update_ws.bind(this));
+		this._restacked = global.display.connect('restacked', this._update_ws.bind(this));
 	}
 
 	// remove signals, restore Activities button, destroy workspaces bar
 	_destroy() {
 		this._show_activities(true);
-		global.workspace_manager.disconnect(this._ws_active_changed);
-		global.workspace_manager.disconnect(this._ws_number_changed);
-		this.workspaces_settings.disconnect(this.workspaces_names_changed);
+		if (this._ws_active_changed) {
+			global.workspace_manager.disconnect(this._ws_active_changed);
+		}
+		if (this._ws_number_changed) {
+			global.workspace_manager.disconnect(this._ws_number_changed);
+		}
+		if (this._restacked) {
+			global.display.disconnect(this._restacked);
+		}
+		if (this.workspaces_names_changed) {
+			this.workspaces_settings.disconnect(this.workspaces_names_changed);
+		}
 		this.ws_bar.destroy();
 		super.destroy();
 	}
@@ -79,9 +89,17 @@ class WorkspacesBar extends PanelMenu.Button {
 			this.ws_box = new St.Bin({visible: true, reactive: true, can_focus: true, track_hover: true});						
 			this.ws_box.label = new St.Label({y_align: Clutter.ActorAlign.CENTER});
 			if (ws_index == this.active_ws_index) {
-				this.ws_box.label.style_class = 'desk-label-active';
+				if (global.workspace_manager.get_workspace_by_index(ws_index).n_windows > 0) {
+					this.ws_box.label.style_class = 'desktop-label-nonempty-active';
+				} else {
+					this.ws_box.label.style_class = 'desktop-label-empty-active';
+				}
 			} else {
-				this.ws_box.label.style_class = 'desk-label-inactive';
+				if (global.workspace_manager.get_workspace_by_index(ws_index).n_windows > 0) {
+					this.ws_box.label.style_class = 'desktop-label-nonempty-inactive';
+				} else {
+					this.ws_box.label.style_class = 'desktop-label-empty-inactive';
+				}
 			}
 			if (this.workspaces_names[ws_index]) {
 				this.ws_box.label.set_text("  " + this.workspaces_names[ws_index] + "  ");
@@ -89,7 +107,7 @@ class WorkspacesBar extends PanelMenu.Button {
 				this.ws_box.label.set_text("  " + (ws_index + 1) + "  ");
 			}
 			this.ws_box.set_child(this.ws_box.label);
-			this.ws_box.connect('button-press-event', () => this._toggle_ws(ws_index) );
+			this.ws_box.connect('button-release-event', () => this._toggle_ws(ws_index) );
 	        this.ws_bar.add_actor(this.ws_box);
 		}
     }
