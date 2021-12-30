@@ -7,12 +7,16 @@
 
 
 const { Clutter, Gio, GObject, Shell, St } = imports.gi;
+const Lang = imports.lang
+const PopupMenu = imports.ui.popupMenu;
 
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
+const ExtensionUtils = imports.misc.extensionUtils;
 
 var WORKSPACES_SCHEMA = "org.gnome.desktop.wm.preferences";
 var WORKSPACES_KEY = "workspace-names";
+const WORKSPACES_BAR_SCHEMA = 'org.gnome.shell.extensions.workspaces-bar';
 
 
 var WorkspacesBar = GObject.registerClass(
@@ -37,6 +41,28 @@ class WorkspacesBar extends PanelMenu.Button {
 		this._ws_number_changed = global.workspace_manager.connect('notify::n-workspaces', this._update_ws.bind(this));
 		this._restacked = global.display.connect('restacked', this._update_ws.bind(this));
 		this._windows_changed = Shell.WindowTracker.get_default().connect('tracked-windows-changed', this._update_ws.bind(this));
+
+        // setup settings
+        this._renaming = false;
+
+        this._gsettings = ExtensionUtils.getSettings(WORKSPACES_BAR_SCHEMA);
+        this._gsettings.connect("changed::renaming", this._renaming_changed.bind(this));
+        this._renaming_changed();
+
+        // if enabled, make popup menu only open on right click
+        var click_handler = function(origin, event) {
+            const key = event.get_button();
+            if (this._renaming) {
+                if (key == 1) {
+                    this.menu.close();
+                } else if (key == 3) {
+                    this.menu.open();
+                }
+            } else {
+                this.menu.close();
+            }
+        };
+        this.connect('button-press-event', Lang.bind(this, click_handler));
 	}
 
 	// remove signals, restore Activities button, destroy workspaces bar
@@ -60,6 +86,64 @@ class WorkspacesBar extends PanelMenu.Button {
 		this.ws_bar.destroy();
 		super.destroy();
 	}
+
+    // build a context popup menu with the workspace name entries
+    _buildMenu() {
+        // remove all menu items
+        this.menu.removeAll();
+
+        // array of entry widgets
+        let entries = [];
+
+        // add a menu item for each workspace
+        for (let ws_index = 0; ws_index < this.ws_count; ++ws_index) {
+            let menu_item = new PopupMenu.PopupBaseMenuItem({
+                reactive: false,
+                can_focus: false
+            });
+            let ws_name_entry = new St.Entry({
+                name: 'ws_entry' + (ws_index + 1),
+                style_class: 'workspace-name-entry',
+                can_focus: true,
+                hint_text: _('Workspace name...'),
+                track_hover: true,
+                x_expand: true,
+                y_expand: true
+            });
+
+            // set the text to workspace names
+            if (this.workspaces_names[ws_index]) {
+				ws_name_entry.set_text("" + this.workspaces_names[ws_index] + "");
+			} else {
+				ws_name_entry.set_text("  " + (ws_index + 1) + "  ");
+			}
+
+            // make entry trigger rename of this workspace on pressing enter
+            var enter_handler = function(origin, event) {
+                const key = event.get_key_symbol();
+                if (key == Clutter.KEY_Return || key == Clutter.KEY_KP_Enter || key == Clutter.KEY_ISO_Enter) {
+                    this._rename_ws(ws_index, origin.get_text());
+                }
+            };
+            ws_name_entry.get_clutter_text().connect(
+                'key-press-event', Lang.bind(this, enter_handler)
+            );
+
+            // add menu item
+            menu_item.add(ws_name_entry);
+            this.menu.addMenuItem(menu_item);
+
+            // keep track of entry widget
+            entries.push(ws_name_entry);
+        }
+
+        // add menu item for renaming all workspaces at once
+        let rename_menu_item = new PopupMenu.PopupMenuItem(_('Rename'));
+        this.menu.addMenuItem(rename_menu_item);
+        rename_menu_item.connect('activate', this._rename_all.bind(this)));
+
+        this.menu_entries = entries;
+    }
 	
 	// hide Activities button
 	_show_activities(show) {
@@ -77,6 +161,10 @@ class WorkspacesBar extends PanelMenu.Button {
 	_update_workspaces_names() {
 		this.workspaces_names = this.workspaces_settings.get_strv(WORKSPACES_KEY);
 		this._update_ws();
+        // build the menu
+        //if (this._renaming) {
+        this._buildMenu();
+        //}
 	}
 
 	// update the workspaces bar
@@ -106,12 +194,23 @@ class WorkspacesBar extends PanelMenu.Button {
 				}
 			}
 			if (this.workspaces_names[ws_index]) {
-				this.ws_box.label.set_text("  " + this.workspaces_names[ws_index] + "  ");
+				this.ws_box.label.set_text("" + this.workspaces_names[ws_index] + "");
 			} else {
 				this.ws_box.label.set_text("  " + (ws_index + 1) + "  ");
 			}
 			this.ws_box.set_child(this.ws_box.label);
-			this.ws_box.connect('button-release-event', () => this._toggle_ws(ws_index) );
+
+            // only switch to workspace on left click
+			this.ws_box.connect('button-press-event', (origin, event) => {
+                if (this._renaming) {
+                    if (event.get_button() == 1) {
+                        this._toggle_ws(ws_index);
+                    }
+                } else {
+                    this._toggle_ws(ws_index);
+                }
+            });
+            
 	        this.ws_bar.add_actor(this.ws_box);
 		}
     }
@@ -123,6 +222,37 @@ class WorkspacesBar extends PanelMenu.Button {
 		} else {
 			global.workspace_manager.get_workspace_by_index(ws_index).activate(global.get_current_time());
 		}
+    }
+
+    // rename all workspaces
+    _rename_all() {
+        // check if menu and workspace number match
+        if (this.menu_entries.length != this.workspaces_names.length) {return;}
+
+        // build array of new workspace names
+        let new_workspaces_names = [];
+        for (let i = 0; i < this.menu_entries.length; i++) {
+            let new_name = this.menu_entries[i].get_text();
+            new_workspaces_names.push(new_name);
+        }
+        
+        // set workspace names
+        this.workspaces_settings.set_strv(WORKSPACES_KEY, new_workspaces_names);
+    }
+
+    // rename workspace with given index
+    _rename_ws(ws_index, ws_name) {
+        // build array with altered workspace name
+        let new_workspaces_names = Array.from(this.workspaces_names);
+        new_workspaces_names[ws_index] = ws_name;
+
+        // set workspace names
+        this.workspaces_settings.set_strv(WORKSPACES_KEY, new_workspaces_names);
+    }
+
+    // handle (de)activation of renaming
+    _renaming_changed() {
+        this._renaming = this._gsettings.get_boolean('renaming');
     }
 });
 
