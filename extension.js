@@ -49,18 +49,12 @@ class WorkspacesBar extends PanelMenu.Button {
         this._gsettings.connect("changed::renaming", this._renaming_changed.bind(this));
         this._renaming_changed();
 
-        // if enabled, make popup menu only open on right click
+        // if enabled, make popup menu only open on right/middle click
         var click_handler = function(origin, event) {
             const key = event.get_button();
             if (this._renaming) {
                 if (key == 1) {
                     this.menu.close();
-                } else if (key == 3) {
-                    if (!this.menu.isOpen) {
-                        this.menu.close();
-                    } else {
-                        this.menu.open();
-                    }
                 }
             } else {
                 this.menu.close();
