@@ -56,7 +56,11 @@ class WorkspacesBar extends PanelMenu.Button {
                 if (key == 1) {
                     this.menu.close();
                 } else if (key == 3) {
-                    this.menu.open();
+                    if (!this.menu.isOpen) {
+                        this.menu.close();
+                    } else {
+                        this.menu.open();
+                    }
                 }
             } else {
                 this.menu.close();
@@ -88,7 +92,7 @@ class WorkspacesBar extends PanelMenu.Button {
 	}
 
     // build a context popup menu with the workspace name entries
-    _buildMenu() {
+    _build_menu() {
         // remove all menu items
         this.menu.removeAll();
 
@@ -162,9 +166,7 @@ class WorkspacesBar extends PanelMenu.Button {
 		this.workspaces_names = this.workspaces_settings.get_strv(WORKSPACES_KEY);
 		this._update_ws();
         // build the menu
-        //if (this._renaming) {
-        this._buildMenu();
-        //}
+        this._build_menu();
 	}
 
 	// update the workspaces bar
@@ -200,10 +202,10 @@ class WorkspacesBar extends PanelMenu.Button {
 			}
 			this.ws_box.set_child(this.ws_box.label);
 
-            // only switch to workspace on left click
+            // if renaming is enabled, only switch to workspace on left click when popup menu is not open
 			this.ws_box.connect('button-press-event', (origin, event) => {
                 if (this._renaming) {
-                    if (event.get_button() == 1) {
+                    if (event.get_button() == 1 && !this.menu.isOpen) {
                         this._toggle_ws(ws_index);
                     }
                 } else {
