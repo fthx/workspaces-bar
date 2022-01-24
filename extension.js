@@ -19,6 +19,7 @@ var WorkspacesBar = GObject.registerClass(
 class WorkspacesBar extends PanelMenu.Button {
 	_init() {
 		super._init(0.0, 'Workspaces bar');
+		this.track_hover = false;
 		
 		// define gsettings schema for workspaces names, get workspaces names, signal for settings key changed
 		this.workspaces_settings = new Gio.Settings({ schema: WORKSPACES_SCHEMA });
