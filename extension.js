@@ -84,9 +84,8 @@ class WorkspacesBar extends PanelMenu.Button {
         const BASE_CLASS = "desktop__label";
         let classes = BASE_CLASS;
 
-        const has_windows =
-            global.workspace_manager.get_workspace_by_index(ws_index)
-                .n_windows > 0;
+        const has_windows = global.workspace_manager.get_workspace_by_index(ws_index)
+            .n_windows > 0;
         const is_active = ws_index == this.active_ws_index;
 
         if (is_active) classes += ` ${BASE_CLASS}--active`;
@@ -109,8 +108,9 @@ class WorkspacesBar extends PanelMenu.Button {
 			this.ws_box.label = new St.Label({y_align: Clutter.ActorAlign.CENTER});
 			this.ws_box.label.style_class = this._get_ws_box_class(ws_index);
 				
-            const ws_name = String(this.workspaces_names[ws_index] || ws_index + 1)
+            const ws_name = String(this.workspaces_names[ws_index] || ws_index + 1);
 
+            this.ws_box.label.set_text(ws_name);
 			this.ws_box.set_child(this.ws_box.label);
 			this.ws_box.connect('button-release-event', () => this._toggle_ws(ws_index) );
 	        this.ws_bar.add_actor(this.ws_box);
