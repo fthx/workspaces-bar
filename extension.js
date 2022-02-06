@@ -43,6 +43,8 @@ class WorkspacesBar extends PanelMenu.Button {
 
         // setup settings
         this._renaming = false;
+        this._max_word_length_for_padding = 3;
+        this._spaces_padding = 2;
 
         this._gsettings = ExtensionUtils.getSettings(WORKSPACES_BAR_SCHEMA);
         this._gsettings.connect("changed::renaming", this._renaming_changed.bind(this));
@@ -110,9 +112,9 @@ class WorkspacesBar extends PanelMenu.Button {
 
             // set the text to workspace names
             if (this.workspaces_names[ws_index]) {
-				ws_name_entry.set_text("" + this.workspaces_names[ws_index] + "");
+				ws_name_entry.set_text(this.workspaces_names[ws_index].trim());
 			} else {
-				ws_name_entry.set_text("  " + (ws_index + 1) + "  ");
+				ws_name_entry.set_text((ws_index + 1).toString());
 			}
 
             // make entry trigger rename of this workspace on pressing enter
@@ -156,6 +158,11 @@ class WorkspacesBar extends PanelMenu.Button {
 	// update workspaces names
 	_update_workspaces_names() {
 		this.workspaces_names = this.workspaces_settings.get_strv(WORKSPACES_KEY);
+        this.ws_count = global.workspace_manager.get_n_workspaces();
+        // if the workspace names array is too large, delete the trailing entries
+        if (this.workspaces_names.length > this.ws_count) {
+            this.workspaces_settings.set_strv(WORKSPACES_KEY, this.workspaces_names.slice(0, this.ws_count));
+        } // else if(this.workspaces_names.length < this.ws_count) -> needs handling?
 		this._update_ws();
 	}
 
@@ -186,9 +193,13 @@ class WorkspacesBar extends PanelMenu.Button {
 				}
 			}
 			if (this.workspaces_names[ws_index]) {
-				this.ws_box.label.set_text("" + this.workspaces_names[ws_index] + "");
+                if (this.workspaces_names[ws_index].length <= this._max_word_length_for_padding) { // space padding for small names
+				    this.ws_box.label.set_text(" ".repeat(this._spaces_padding) + this.workspaces_names[ws_index] + " ".repeat(this._spaces_padding));
+                } else {
+				    this.ws_box.label.set_text(this.workspaces_names[ws_index]);
+                }
 			} else {
-				this.ws_box.label.set_text("  " + (ws_index + 1) + "  ");
+				this.ws_box.label.set_text(" ".repeat(this._spaces_padding) + (ws_index + 1) + " ".repeat(this._spaces_padding));
 			}
 			this.ws_box.set_child(this.ws_box.label);
 
@@ -220,13 +231,13 @@ class WorkspacesBar extends PanelMenu.Button {
 
     // rename all workspaces
     _rename_all() {
-        // check if menu and workspace number match
-        if (this.menu_entries.length != this.workspaces_names.length) {return;}
+        // check if number menu entries matches workspace number
+        if (this.menu_entries.length != this.ws_count) { return; }
 
         // build array of new workspace names
         let new_workspaces_names = [];
-        for (let i = 0; i < this.menu_entries.length; i++) {
-            let new_name = this.menu_entries[i].get_text();
+        for (let i = 0; i < this.ws_count; i++) {
+            let new_name = this.menu_entries[i].get_text().trim();
             new_workspaces_names.push(new_name);
         }
         
