@@ -1,0 +1,9 @@
+<schemalist>
+  <schema id="org.gnome.shell.extensions.workspaces-bar" path="/org/gnome/shell/extensions/workspaces-bar/">
+    <key name="renaming" type="b">
+      <default>true</default>
+      <summary>Enables a popup menu to rename workspaces.</summary>
+      <description>Enables a popup menu to rename workspaces.</description>
+    </key>
+  </schema>
+</schemalist>
