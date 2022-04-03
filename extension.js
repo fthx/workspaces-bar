@@ -79,6 +79,19 @@ class WorkspacesBar extends PanelMenu.Button {
 		this.workspaces_names = this.workspaces_settings.get_strv(WORKSPACES_KEY);
 		this._update_ws();
 	}
+    
+    _get_ws_box_class(ws_index) {
+        const BASE_CLASS = "desktop__label";
+        let classes = BASE_CLASS;
+
+        const has_windows = global.workspace_manager.get_workspace_by_index(ws_index)
+            .n_windows > 0;
+        const is_active = ws_index == this.active_ws_index;
+
+        if (is_active) classes += ` ${BASE_CLASS}--active`;
+        if (has_windows) classes += ` ${BASE_CLASS}--occupied`;
+        return classes;
+    }
 
 	// update the workspaces bar
     _update_ws() {
@@ -93,24 +106,11 @@ class WorkspacesBar extends PanelMenu.Button {
         for (let ws_index = 0; ws_index < this.ws_count; ++ws_index) {
 			this.ws_box = new St.Bin({visible: true, reactive: true, can_focus: true, track_hover: true});						
 			this.ws_box.label = new St.Label({y_align: Clutter.ActorAlign.CENTER});
-			if (ws_index == this.active_ws_index) {
-				if (global.workspace_manager.get_workspace_by_index(ws_index).n_windows > 0) {
-					this.ws_box.label.style_class = 'desktop-label-nonempty-active';
-				} else {
-					this.ws_box.label.style_class = 'desktop-label-empty-active';
-				}
-			} else {
-				if (global.workspace_manager.get_workspace_by_index(ws_index).n_windows > 0) {
-					this.ws_box.label.style_class = 'desktop-label-nonempty-inactive';
-				} else {
-					this.ws_box.label.style_class = 'desktop-label-empty-inactive';
-				}
-			}
-			if (this.workspaces_names[ws_index]) {
-				this.ws_box.label.set_text("  " + this.workspaces_names[ws_index] + "  ");
-			} else {
-				this.ws_box.label.set_text("  " + (ws_index + 1) + "  ");
-			}
+			this.ws_box.label.style_class = this._get_ws_box_class(ws_index);
+				
+            const ws_name = String(this.workspaces_names[ws_index] || ws_index + 1);
+
+            this.ws_box.label.set_text(ws_name);
 			this.ws_box.set_child(this.ws_box.label);
 			this.ws_box.connect('button-release-event', () => this._toggle_ws(ws_index) );
 	        this.ws_bar.add_actor(this.ws_box);
@@ -119,7 +119,8 @@ class WorkspacesBar extends PanelMenu.Button {
 
     // activate workspace or show overview
     _toggle_ws(ws_index) {
-		if (global.workspace_manager.get_active_workspace_index() == ws_index) {
+        const is_active = global.workspace_manager.get_active_workspace_index() == ws_index
+		if (is_active) {
 			Main.overview.toggle();
 		} else {
 			global.workspace_manager.get_workspace_by_index(ws_index).activate(global.get_current_time());
