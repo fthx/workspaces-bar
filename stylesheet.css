@@ -39,27 +39,31 @@
 /* non-framed version */
 
 .desktop-label-nonempty-active {
+  padding: 3px 0;
   margin-left: 0px;
   margin-right: 8px;
-  background-color: rgba(154, 154, 154, 0.7);
+  background-color: rgba(255, 255, 255, 0.3);
   border-radius: 4px;
 }
 
 .desktop-label-nonempty-inactive {
+  padding: 3px 0;
   margin-left: 0px;
   margin-right: 8px;
-  background-color: rgba(96, 96, 96, 0.7);
+  background-color: rgba(0, 0, 0, 0.0);
   border-radius: 4px;
 }
 
 .desktop-label-empty-active {
+  padding: 3px 0;
   margin-left: 0px;
   margin-right: 8px;
-  background-color: rgba(154, 154, 154, 0.7);
+  background-color: rgba(255, 255, 255, 0.3);
   border-radius: 4px;
 }
 
 .desktop-label-empty-inactive {
+  padding: 3px 0;
   margin-left: 0px;
   margin-right: 8px;
   background-color: rgba(0, 0, 0, 0.0);
