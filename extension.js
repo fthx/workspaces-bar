@@ -109,7 +109,11 @@ class WorkspacesBar extends PanelMenu.Button {
 			if (this.workspaces_names[ws_index]) {
 				this.ws_box.label.set_text("  " + this.workspaces_names[ws_index] + "  ");
 			} else {
-				this.ws_box.label.set_text("  " + (ws_index + 1) + "  ");
+				if (this.ws_count == ws_index + 1 && this.active_ws_index != ws_index && global.workspace_manager.get_workspace_by_index(ws_index).n_windows == 0) {
+					this.ws_box.label.set_text("  +  ");
+				} else {
+					this.ws_box.label.set_text("  " + (ws_index + 1) + "  ");
+				}
 			}
 			this.ws_box.set_child(this.ws_box.label);
 			this.ws_box.connect('button-release-event', () => this._toggle_ws(ws_index) );
